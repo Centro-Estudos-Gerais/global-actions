@@ -38,7 +38,8 @@ jobs:
 
       - name: Change group-id and artifact-id
         run: |
-          cd ${{ inputs.artifact-id }}
+          cd ./${{ inputs.artifact-id }}
+          ls
           gradlew setGroupId -PnewGroupId=ceg.lib
           gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
 

@@ -50,6 +50,7 @@ jobs:
           gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}"
           
       - name: Update ArtifactId in gradle.properties
+        working-directory: ${{ inputs.artifact-id }}
         run: |
           sed -i "s/artifactId=.*/artifactId=${{ inputs.artifact-id }}/" gradle.properties
 

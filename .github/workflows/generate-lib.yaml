@@ -11,12 +11,10 @@ jobs:
   generate-repo:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Usar GH_TOKEN para autenticação
+    steps:          
+      - name: Checkout repository
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          
-      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Validate repository existence

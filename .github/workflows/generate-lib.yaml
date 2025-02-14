@@ -40,8 +40,8 @@ jobs:
         run: |
           cd ./${{ inputs.artifact-id }}
           ls
-          gradlew setGroupId -PnewGroupId=ceg.lib
-          gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
+          ./gradlew setGroupId -PnewGroupId=ceg.lib
+          ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
 
       - name: Rename folders in src/main/java
         run: |

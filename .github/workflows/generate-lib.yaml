@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Usar GH_TOKEN para autenticação
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          
       - name: Checkout repository
         uses: actions/checkout@v3
 

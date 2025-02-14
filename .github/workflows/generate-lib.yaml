@@ -34,7 +34,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}.git" .
+          git clone "https://${{ github.repository_owner }}:${{ secret.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}
 
       - name: Change group-id and artifact-id
         working-directory: "./${{ inputs.artifact-id }}"

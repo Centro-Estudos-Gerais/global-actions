@@ -55,12 +55,6 @@ jobs:
           ./gradlew setGroupId -PnewGroupId=ceg.lib
           ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
 
-      - name: Rename folders in src/main/java
-        run: |
-          mkdir -p src/main/java/ceg/lib
-          mv src/main/java/com/example/* src/main/java/ceg/lib/
-          rm -rf src/main/java/com/example
-
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"

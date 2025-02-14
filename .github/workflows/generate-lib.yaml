@@ -1,0 +1,56 @@
+name: Generate Repository from lib-template
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact-id:
+        description: 'Nome do repositório a ser criado'
+        required: true
+
+jobs:
+  generate-repo:
+    runs-on: ubuntu-latest
+
+    steps:          
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Validate repository existence
+        id: validate-repo
+        run: |
+          REPO_EXISTS=$(gh repo view "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --json name -q '.name' 2>/dev/null || echo "false")
+          if [ "$REPO_EXISTS" != "false" ]; then
+            echo "::error::Repositório ${{ inputs.artifact-id }} já existe na organização."
+            exit 1
+          fi
+
+      - name: Create new repository from template
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository }}" --public
+
+      - name: Clone the new repository
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}" .
+
+      - name: Change group-id and artifact-id
+        run: |
+          ./gradlew setGroupId -PnewGroupId=ceg.lib
+          ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
+
+      - name: Rename folders in src/main/java
+        run: |
+          mkdir -p src/main/java/ceg/lib
+          mv src/main/java/com/example/* src/main/java/ceg/lib/
+          rm -rf src/main/java/com/example
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"
+          git push origin main

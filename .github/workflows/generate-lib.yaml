@@ -59,8 +59,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git config --global user.name "Centro-Estudos-Gerais"
-          git config --global user.email "ceg_ghb@outlook.com"
+          git config --global user.name "JL-Junior"
+          git config --global user.email "lopezz_lopez@hotmail.com"
           git add .
           git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"
           git push origin master

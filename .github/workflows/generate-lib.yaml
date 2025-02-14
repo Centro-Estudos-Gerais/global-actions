@@ -30,6 +30,9 @@ jobs:
         run: |
           gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository_owner }}/lib-template" --private
 
+      - name: Pause for 5 seconds
+        run: sleep 5 
+      
       - name: Clone the new repository
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

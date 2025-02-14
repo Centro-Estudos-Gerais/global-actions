@@ -38,9 +38,9 @@ jobs:
 
       - name: Verify and set executable permission for gradlew
         run: |
-          ls
+          ls -1a | paste -sd ','
           cd ./${{ inputs.artifact-id }}
-          ls
+          ls -1a | paste -sd ','
           if [ ! -f ./gradlew ]; then
             echo "gradlew file is missing"
             exit 1

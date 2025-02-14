@@ -1,10 +1,10 @@
-name: Generate Quarkus Lib
+name: Generate Repository from lib-template
 
 on:
   workflow_dispatch:
     inputs:
       artifact-id:
-        description: 'Nome do repositório (artifact-id)'
+        description: 'Nome do repositório a ser criado'
         required: true
 
 jobs:
@@ -12,49 +12,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check if repository exists
-        id: check-repo
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data: repo } = await github.rest.repos.get({
-              owner: context.repo.owner,
-              repo: '${{ inputs.artifact-id }}'
-            }).catch(() => ({ data: null }));
-            if (repo) {
-              core.setFailed(`Repositório ${{ inputs.artifact-id }} já existe na organização.`);
-            }
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Validate repository existence
+        id: validate-repo
+        run: |
+          REPO_EXISTS=$(gh repo view "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --json name -q '.name' 2>/dev/null || echo "false")
+          if [ "$REPO_EXISTS" != "false" ]; then
+            echo "::error::Repositório ${{ inputs.artifact-id }} já existe na organização."
+            exit 1
+          fi
 
       - name: Create new repository from template
-        uses: actions/create-repo-from-template@v1
-        with:
-          template: 'lib-template'
-          repo-name: '${{ inputs.artifact-id }}'
-          owner: '${{ github.repository_owner }}'
-
-      - name: Checkout new repository
-        uses: actions/checkout@v3
-        with:
-          repository: '${{ github.repository_owner }}/${{ inputs.artifact-id }}'
-          path: './${{ inputs.artifact-id }}'
-
-      - name: Update group-id and artifact-id
         run: |
-          cd ./${{ inputs.artifact-id }}
-          ./gradlew renameProject -PnewGroupId=ceg.lib -PnewArtifactId=${{ inputs.artifact-id }}
+          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository }}" --public
 
-      - name: Rename src folders
+      - name: Clone the new repository
         run: |
-          cd ./${{ inputs.artifact-id }}
+          gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}" .
+
+      - name: Change group-id and artifact-id
+        run: |
+          ./gradlew setGroupId -PnewGroupId=ceg.lib
+          ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
+
+      - name: Rename folders in src/main/java
+        run: |
           mkdir -p src/main/java/ceg/lib
           mv src/main/java/com/example/* src/main/java/ceg/lib/
           rm -rf src/main/java/com/example
 
       - name: Commit and push changes
         run: |
-          cd ./${{ inputs.artifact-id }}
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Update group-id and artifact-id to ${{ inputs.artifact-id }}"
+          git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"
           git push origin main

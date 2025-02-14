@@ -34,7 +34,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git clone "https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git"
+          gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}" .
 
       - name: Verify and set executable permission for gradlew
         run: |

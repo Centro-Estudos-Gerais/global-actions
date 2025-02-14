@@ -13,8 +13,6 @@ jobs:
 
     steps:          
       - name: Checkout repository
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         uses: actions/checkout@v3
 
       - name: Validate repository existence
@@ -27,10 +25,14 @@ jobs:
           fi
 
       - name: Create new repository from template
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository }}" --public
 
       - name: Clone the new repository
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}" .
 

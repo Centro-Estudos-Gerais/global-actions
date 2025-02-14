@@ -38,6 +38,7 @@ jobs:
 
       - name: Verify and set executable permission for gradlew
         run: |
+          ls
           cd ./${{ inputs.artifact-id }}
           ls
           if [ ! -f ./gradlew ]; then

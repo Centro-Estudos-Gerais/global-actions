@@ -38,19 +38,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}"
-
-      - name: Verify and set executable permission for gradlew
-        run: |
-          ls -1a | paste -sd ','
-          cd ./${{ inputs.artifact-id }}
-          ls -1a | paste -sd ','
-          if [ ! -f ./gradlew ]; then
-            echo "gradlew file is missing"
-            exit 1
-          fi
-          chmod +x ./gradlew
           
       - name: Change group-id and artifact-id
+        working-directory: ${{ inputs.artifact-id }}
         run: |
           ./gradlew setGroupId -PnewGroupId=ceg.lib
           ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}

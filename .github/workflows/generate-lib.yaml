@@ -39,6 +39,7 @@ jobs:
       - name: Verify and set executable permission for gradlew
         run: |
           cd ./${{ inputs.artifact-id }}
+          ls
           if [ ! -f ./gradlew ]; then
             echo "gradlew file is missing"
             exit 1
@@ -47,8 +48,6 @@ jobs:
           
       - name: Change group-id and artifact-id
         run: |
-          cd ./${{ inputs.artifact-id }}
-          ls
           ./gradlew setGroupId -PnewGroupId=ceg.lib
           ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
 

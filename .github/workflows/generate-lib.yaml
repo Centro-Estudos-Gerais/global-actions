@@ -28,7 +28,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository }}" --public
+          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository_owner }}/lib-template" --private
 
       - name: Clone the new repository
         env:

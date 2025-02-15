@@ -15,6 +15,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Validate repository existence
         id: validate-repo
         run: |
@@ -28,29 +38,30 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository }}" --public
+          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository_owner }}/lib-template" --private
 
+      - name: Pause for 5 seconds
+        run: sleep 5 
+      
       - name: Clone the new repository
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}" .
-
-      - name: Change group-id and artifact-id
+          gh repo clone "${{ github.repository_owner }}/${{ inputs.artifact-id }}"
+          
+      - name: Update ArtifactId in gradle.properties
+        working-directory: ${{ inputs.artifact-id }}
         run: |
-          ./gradlew setGroupId -PnewGroupId=ceg.lib
-          ./gradlew setArtifactId -PnewArtifactId=${{ inputs.artifact-id }}
-
-      - name: Rename folders in src/main/java
-        run: |
-          mkdir -p src/main/java/ceg/lib
-          mv src/main/java/com/example/* src/main/java/ceg/lib/
-          rm -rf src/main/java/com/example
+          sed -i "s/artifactId=.*/artifactId=${{ inputs.artifact-id }}/" gradle.properties
 
       - name: Commit and push changes
+        working-directory: ${{ inputs.artifact-id }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "JL-Junior"
+          git config --global user.email "lopezz_lopez@hotmail.com"
+          git remote set-url origin "https://$GH_TOKEN@github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git"
           git add .
           git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"
-          git push origin main
+          git push origin master

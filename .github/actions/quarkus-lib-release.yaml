@@ -1,0 +1,39 @@
+name: 'Quarkus Library Release'
+description: 'Compila e publica uma biblioteca Java Quarkus no GitHub Package Registry e cria um Pull Request para a branch Master.'
+inputs:
+  artifact-id:
+    description: 'Nome do artefato (artifact-id)'
+    required: true
+  version:
+    description: 'Versão da biblioteca'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Build the project
+      run: ./gradlew build
+      shell: bash
+
+    - name: Publish to GitHub Package Registry
+      run: ./gradlew publish
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create Pull Request to Master
+      uses: peter-evans/create-pull-request@v4
+      with:
+        title: "Release ${{ inputs.version }}"
+        branch: "release/v${{ inputs.version }}"
+        base: master
+        body: "Automated PR for release ${{ inputs.version }}"
+        commit-message: "Release ${{ inputs.version }}"

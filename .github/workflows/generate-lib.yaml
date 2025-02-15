@@ -61,6 +61,7 @@ jobs:
         run: |
           git config --global user.name "JL-Junior"
           git config --global user.email "lopezz_lopez@hotmail.com"
+          git remote set-url origin "https://$GH_TOKEN@github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git"
           git add .
           git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"
           git push origin master

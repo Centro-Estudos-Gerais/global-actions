@@ -1,0 +1,5 @@
+name: 'Build Without Tests'
+description: 'Faz o build do projeto sem executar os testes.'
+runs:
+  using: 'node16'
+  main: 'index.js'

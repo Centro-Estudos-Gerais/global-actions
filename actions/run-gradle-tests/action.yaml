@@ -1,0 +1,5 @@
+name: 'Run Tests'
+description: 'Executa os testes do projeto.'
+runs:
+  using: 'node16'
+  main: 'index.js'

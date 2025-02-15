@@ -1,0 +1,116 @@
+name: 'Quarkus Library Release'
+description: 'Compila e publica uma biblioteca Java Quarkus no GitHub Package Registry e cria um Pull Request para a branch Master.'
+inputs:
+  artifact-id:
+    description: 'Nome do artefato (artifact-id)'
+    required: true
+  version:
+    description: 'Versão da biblioteca'
+    required: true
+
+jobs:
+
+  extract-properties:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Passo 1: Checkout do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Passo 2: Ler o arquivo gradle.properties
+      - name: Ler gradle.properties
+        id: gradle-properties
+        run: |        
+          # Extrai a versão
+          VERSION=$(grep 'version' gradle.properties | cut -d'=' -f2)
+          echo "Version: $VERSION"
+
+          # Define as variáveis de ambiente
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+          # Define as saídas (outputs) para uso em outros jobs
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+  
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      
+      - name: Build project
+        run: ./gradlew build -x test
+      
+
+
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Run tests
+        run: ./gradlew test
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [build, test, extract-properties]
+    if: success()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Publish to GitHub Package Registry
+        run: ./gradlew publish
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    
+      - name: Create Pull Request to Master
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "Merge from Release ${{ steps.extract-properties.outputs.version }}"
+          branch: "release/v${{ steps.extract-properties.outputs.version }}"
+          base: master
+          body: "Automated PR for release ${{ steps.extract-properties.outputs.version }}"
+          commit-message: "Release ${{ steps.extract-properties.outputs.version }}"
+
+

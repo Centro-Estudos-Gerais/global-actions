@@ -4,9 +4,7 @@ inputs:
   version:
     description: 'Versão do projeto'
     required: true
-  token:
-    description: 'Token de acesso ao GitHub'
-    required: true
+
 runs:
   using: 'node16'
   main: 'index.js'

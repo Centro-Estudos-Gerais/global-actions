@@ -5,7 +5,6 @@ const github = require('@actions/github');
 function run() {
   try {
     const version = core.getInput('version');
-    const token = core.getInput('token');
 
     // Publica a imagem
     exec('./gradlew publish', (error, stdout, stderr) => {
@@ -15,7 +14,7 @@ function run() {
         core.info(stdout);
 
         // Cria o PR
-        const octokit = github.getOctokit(token);
+        const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
         octokit.rest.pulls.create({
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,

@@ -35,9 +35,9 @@ jobs:
             ~/.gradle/wrapper
           restore-keys: |
             ${{ runner.os }}-gradle-
-            
+
       - name: Debug Gradle Cache Key
-        run: echo "Cache Key: ${{ env.gradle-cache-key }}"
+        run: echo "Cache Key -> ${{ env.gradle-cache-key }}"
 
       - name: Compile gradle files
         run: './gradlew assemble'

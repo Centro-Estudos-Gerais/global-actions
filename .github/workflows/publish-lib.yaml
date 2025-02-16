@@ -101,11 +101,19 @@ jobs:
             ~/.gradle/wrapper
           restore-keys: |
             ${{ runner.os }}-gradle-
+      
+      # TODO remover      
+      - name: Debug Repository URL and Credentials
+        run: |
+          echo "Repository URL: https://maven.pkg.github.com/Centro-Estudos-Gerais/org-packages"
+          echo "GITHUB_ACTOR: ${{ github.actor }}"
+          echo "GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}"
 
       - name: Publicar com Gradle
         run: ./gradlew publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   create-pr:
     runs-on: ubuntu-latest

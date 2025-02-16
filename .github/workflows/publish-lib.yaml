@@ -27,7 +27,7 @@ jobs:
         if: ${{ steps.cache-gradle.outputs.cache-hit != 'true' }}
       
       - name: Compile gradle files
-        run: node .github/actions/global-actions/components/compile.js
+        run: './gradlew build'
       
       - name: Caches Gradle files
         uses: actions/cache@v4

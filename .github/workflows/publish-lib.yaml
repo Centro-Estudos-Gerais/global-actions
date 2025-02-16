@@ -24,6 +24,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
+
+      - name: Cache JDK 21
+        uses: actions/cache@v4
+        id: cache-jdk
+        with:
+          path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
+          key: jdk-21-${{ runner.os }}
+          restore-keys: |
+            jdk-21-
       
       - name: Caches Gradle files
         uses: actions/cache@v4
@@ -31,13 +40,11 @@ jobs:
         with:
           key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
           path: |
+            ~/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
             ~/.gradle/caches
             ~/.gradle/wrapper
           restore-keys: |
             ${{ runner.os }}-gradle-
-
-      - name: Debug Gradle Cache Key
-        run: echo "Cache Key -> ${{ env.gradle-cache-key }}"
 
       - name: Compile gradle files
         run: './gradlew assemble'
@@ -52,9 +59,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Debug Gradle Cache Key
-        run: echo "Cache Key -> ${{ env.gradle-cache-key }}"
-      
+      - name: Restaurar Cache do JDK 21
+        uses: actions/cache@v4
+        with:
+          path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
+          key: jdk-21-${{ runner.os }}
+          restore-keys: |
+            jdk-21-
+ 
       - name: Restores Cached Gradle Files
         uses: actions/cache@v4
         id: cache-gradle
@@ -74,10 +86,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Debug Gradle Cache Key
-        run: echo "Cache Key -> ${{ env.gradle-cache-key }}"
-
+ 
+      - name: Restaurar Cache do JDK 21
+        uses: actions/cache@v4
+        with:
+          path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
+          key: jdk-21-${{ runner.os }}
+          restore-keys: |
+            jdk-21-
+            
       - name: Restores Cached Gradle Files
         uses: actions/cache@v4
         id: cache-gradle

@@ -24,7 +24,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
-        if: ${{ steps.cache-gradle.outputs.cache-hit != 'true' }}
       
       - name: Compile gradle files
         run: './gradlew build'

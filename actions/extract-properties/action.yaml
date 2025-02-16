@@ -1,8 +1,0 @@
-name: 'Extract Gradle Properties'
-description: 'Extrai propriedades do arquivo gradle.properties.'
-outputs:
-  version:
-    description: 'Versão do projeto'
-runs:
-  using: 'node16'
-  main: 'index.js'

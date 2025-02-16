@@ -95,6 +95,11 @@ jobs:
           restore-keys: |
             jdk-21-
             
+      - name: Configurar JAVA_HOME
+        run: |
+          echo "JAVA_HOME=$(ls -d /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*/x64 | head -n 1)" >> $GITHUB_ENV
+          echo "PATH=$JAVA_HOME/bin:$PATH" >> $GITHUB_ENV
+      
       - name: Restores Cached Gradle Files
         uses: actions/cache@v4
         id: cache-gradle

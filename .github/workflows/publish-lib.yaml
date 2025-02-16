@@ -48,7 +48,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Caches Gradle files
+      - name: Debug Gradle Cache Key
+        run: echo "Cache Key: ${{ env.gradle-cache-key }}"
+      
+      - name: Restores Cached Gradle Files
         uses: actions/cache@v4
         id: cache-gradle
         with:
@@ -68,7 +71,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Caches Gradle files
+      - name: Debug Gradle Cache Key
+        run: echo "Cache Key: ${{ env.gradle-cache-key }}"
+
+      - name: Restores Cached Gradle Files
         uses: actions/cache@v4
         id: cache-gradle
         with:

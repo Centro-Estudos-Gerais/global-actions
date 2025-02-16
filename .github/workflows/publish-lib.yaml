@@ -102,7 +102,7 @@ jobs:
         run: ./gradlew publish
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GITHUB_USER: ${{ github.actor }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
   create-pr:
     runs-on: ubuntu-latest

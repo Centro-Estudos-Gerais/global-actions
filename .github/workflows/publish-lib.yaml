@@ -16,8 +16,7 @@ jobs:
 
       - name: Create Gradlew Cache Key
         id: create-gradlew-cache-key
-        run: echo "gradle-cache-key=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
-      
+        run: echo "gradle-cache-key=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_ENV      
       - name: Setup Java Environment
         uses: actions/setup-java@v2
         with:
@@ -29,7 +28,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-gradle
         with:
-          key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
+          key: ${{ env.gradle-cache-key }}
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
@@ -53,7 +52,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-gradle
         with:
-          key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
+          key: ${{ env.gradle-cache-key }}
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
@@ -73,7 +72,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-gradle
         with:
-          key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
+          key: ${{ env.gradle-cache-key }}
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper

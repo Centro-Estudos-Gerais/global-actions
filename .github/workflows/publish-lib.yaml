@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-gradle
         with:
-          key: ${{ env.gradle-cache-key }}
+          key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper

@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-gradle
         with:
-          key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
+          key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
@@ -73,7 +73,7 @@ jobs:
         uses: actions/cache@v4
         id: cache-gradle
         with:
-          key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
+          key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper

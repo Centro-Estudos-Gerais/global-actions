@@ -9,14 +9,16 @@ jobs:
   setup-pipeline:
     runs-on: ubuntu-latest
     outputs:
-      gadle-cache-key: ${{ steps.cache-gradle.outputs.cache-key }}
+      gradle-cache-key: ${{ steps.cache-gradle.outputs.cache-key }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Create Gradlew Cache Key
         id: create-gradlew-cache-key
-        run: echo "::set-output name=gadle-cache-key::gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}"
+        outputs:
+          gradle-cache-key: ${{ steps.cache-gradle.outputs.cache-key }}
+        run: echo "::set-output name=gradle-cache-key::gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}"
       
       - name: Setup Java Environment
         uses: actions/setup-java@v2
@@ -24,9 +26,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
-      
-      - name: Compile gradle files
-        run: './gradlew build'
       
       - name: Caches Gradle files
         uses: actions/cache@v4
@@ -38,6 +37,11 @@ jobs:
             ~/.gradle/wrapper
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Compile gradle files
+        run: './gradlew build'
+      
+      
         
 
   run-tests:

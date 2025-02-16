@@ -16,7 +16,7 @@ jobs:
 
       - name: Create Gradlew Cache Key
         id: create-gradlew-cache-key
-        run: echo "::set-output name=gradle-cache-key::gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}"
+        run: echo "gradle-cache-key=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
       
       - name: Setup Java Environment
         uses: actions/setup-java@v2

@@ -25,8 +25,10 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Compile gradle files
-        run: './gradlew assemble'
+      - name: Build do Projeto
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: assemble
       
       - name: Caches Gradle files
         uses: actions/cache@v4
@@ -68,8 +70,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run Tests with Gradle
-        run: ./gradlew test
+      - name: Executar Testes
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
 
         
 
@@ -98,11 +102,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Publish with Gradle
-        run: ./gradlew publish
+      - name: Publicar com Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publish
         env:
+          GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
 
   create-pr:
     runs-on: ubuntu-latest

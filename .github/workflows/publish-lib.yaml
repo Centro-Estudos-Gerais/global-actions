@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-gradle-
         
 
-  Run Tests:
+  run-tests:
     runs-on: ubuntu-latest
     needs: setup-pipeline
     steps:
@@ -57,7 +57,7 @@ jobs:
 
       - name: Run Tests with Gradle
         run: ./gradlew test
-  Publish:
+  publish:
     runs-on: ubuntu-latest
     needs: setup-pipeline
     steps:
@@ -74,7 +74,7 @@ jobs:
       - name: Publish with Gradle
         run: ./gradlew publish
 
-  Create PR:
+  create-pr:
     runs-on: ubuntu-latest
     needs: [publish, run-tests]
     steps:

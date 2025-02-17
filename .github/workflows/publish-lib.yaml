@@ -107,14 +107,11 @@ jobs:
             ${{ runner.os }}-gradle-
       
       # TODO remover      
-      - name: Debug Repository URL and Credentials
-        run: |
-          echo "Repository URL: https://maven.pkg.github.com/Centro-Estudos-Gerais/org-packages"
-          echo "GITHUB_ACTOR: ${{ github.actor }}"
-          echo "GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}"
 
       - name: Publicar com Gradle
-        run: ./gradlew publish
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publish
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -129,7 +126,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
           commit-message: "Merge from ${{ github.ref_name }}"
           branch: ${{ github.ref_name }}
           base: master

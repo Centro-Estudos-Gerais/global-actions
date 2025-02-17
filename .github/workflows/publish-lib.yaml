@@ -2,6 +2,10 @@ name: Lib CI Pipeline
 
 on:
   workflow_call:
+    secrets:
+      GH_TOKEN:
+        required: true
+
   push:
     branches:
       - release/v**

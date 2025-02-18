@@ -130,18 +130,8 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git fetch origin release/v0.0.2
-          git checkout -b pr-release/v0.0.2
-          git merge release/v0.0.2 --no-ff --no-commit
-          git commit -m "Merge changes from release/v0.0.2 into master"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          branch: pr-${{ github.ref_name }}
-          base: master
-          title: "Merge from ${{ github.ref_name }} into master"
-          body: "This PR merges changes from ${{ github.ref_name }} to master."
-          delete-branch: true
-
-        
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: gh pr create --title "Merge from ${{ github.ref }} into master" --body "Automatic merges by github action publish-lib.yml" --base master --head release/v0.0.2

@@ -105,8 +105,7 @@ jobs:
             ~/.gradle/wrapper
           restore-keys: |
             ${{ runner.os }}-gradle-
-      
-      # TODO remover      
+        
 
       - name: Publicar com Gradle
         uses: gradle/gradle-build-action@v2
@@ -125,13 +124,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Sync with Remote
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git fetch origin release/v0.0.2
-
       - name: Create Pull Request
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: gh pr create --title "Merge from ${{ github.ref }} into master" --body "Automatic merges by github action publish-lib.yml" --base master --head release/v0.0.2
+
+      - name: Gerar Resumo do Workflow
+        run: |
+          echo "## 🚀 Relatório do Workflow" >> $GITHUB_STEP_SUMMARY
+          echo "| Etapa  | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY

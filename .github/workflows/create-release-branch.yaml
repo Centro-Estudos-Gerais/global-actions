@@ -64,6 +64,7 @@ jobs:
         run: |
           BRANCH_NAME="release/v${{ inputs.version }}"
           git checkout -b $BRANCH_NAME
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Update version in gradle.properties
         run: |
@@ -72,6 +73,6 @@ jobs:
           sed -i "s/^version=.*/version=${{ inputs.version }}/" gradle.properties
           git add gradle.properties
           git commit -m "Update version to ${{ inputs.version }}"
-          git push --set-upstream origin $BRANCH_NAME
+          git push --set-upstream origin ${{ env.branch_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

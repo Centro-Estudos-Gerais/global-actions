@@ -82,7 +82,7 @@ jobs:
             REPO_URL="https://github.com/${{ github.repository }}.git"
             echo "## Release Report" > release_report.md
             echo "" >> release_report.md
-            echo "### :link: [View Release Branch on GitHub](https://github.com/${{ github.repository }}/tree/$BRANCH_NAME)" >> release_report.md
+            echo "### :link: [View Release Branch on GitHub](https://github.com/${{ github.repository }}/tree/${{ env.branch_name }})" >> release_report.md
             echo "" >> release_report.md
             echo "### :rocket: Commands to clone and checkout the release branch" >> release_report.md
             echo "\`\`\`bash" >> release_report.md

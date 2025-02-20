@@ -32,12 +32,32 @@ jobs:
             echo "### :white_check_mark: Version format is valid" >> report.md
           fi
 
-      - name: Upload validation report
+      - name: Version Validation Summary
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-report
-          path: report.md
+        run: |
+            cat report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Check if branch already exists
+        id: check_branch
+        run: |
+          BRANCH_NAME="release/v${{ inputs.version }}"
+          if git ls-remote --exit-code --heads origin $BRANCH_NAME; then
+            echo "## Validation Report" > branch_report.md
+            echo "" >> branch_report.md
+            echo "### :x: Branch $BRANCH_NAME already exists." >> branch_report.md
+            exit 1
+          else
+            echo "## Validation Report" > branch_report.md
+            echo "" >> branch_report.md
+            echo "### :white_check_mark: Branch $BRANCH_NAME does not exist." >> branch_report.md
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Add branch validation report to GitHub summary
+        if: always()
+        run: cat branch_report.md >> $GITHUB_STEP_SUMMARY
 
       - name: Create release branch
         id: create_branch
@@ -52,6 +72,6 @@ jobs:
           sed -i "s/^version=.*/version=${{ inputs.version }}/" gradle.properties
           git add gradle.properties
           git commit -m "Update version to ${{ inputs.version }}"
-          git push origin $BRANCH_NAME
+          git push --set-upstream origin $BRANCH_NAME
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

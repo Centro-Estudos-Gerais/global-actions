@@ -76,3 +76,21 @@ jobs:
           git push --set-upstream origin ${{ env.branch_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate release report
+        run: |
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            echo "## Release Report" > release_report.md
+            echo "" >> release_report.md
+            echo "### :link: [View Release Branch on GitHub](https://github.com/${{ github.repository }}/tree/$BRANCH_NAME)" >> release_report.md
+            echo "" >> release_report.md
+            echo "### :rocket: Commands to clone and checkout the release branch" >> release_report.md
+            echo "\`\`\`bash" >> release_report.md
+            echo "git clone $REPO_URL" >> release_report.md
+            echo "cd $(basename $REPO_URL .git)" >> release_report.md
+            echo "git checkout ${{env.branch_name}}" >> release_report.md
+            echo "\`\`\`" >> release_report.md
+
+      - name: Add release report to GitHub summary
+        if: always()
+        run: cat release_report.md >> $GITHUB_STEP_SUMMARY

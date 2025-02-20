@@ -59,8 +59,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git config --global user.name "JL-Junior"
-          git config --global user.email "lopezz_lopez@hotmail.com"
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git remote set-url origin "https://$GH_TOKEN@github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git"
           git add .
           git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"

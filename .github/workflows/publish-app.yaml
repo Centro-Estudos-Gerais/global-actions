@@ -48,6 +48,7 @@ jobs:
                   ~/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
                   ~/.gradle/caches
                   ~/.gradle/wrapper
+                  ~/build
                 restore-keys: |
                   ${{ runner.os }}-gradle-
     run-tests:
@@ -73,6 +74,8 @@ jobs:
             path: |
                 ~/.gradle/caches
                 ~/.gradle/wrapper
+                ~/build
+
             restore-keys: |
                 ${{ runner.os }}-gradle-
 
@@ -103,6 +106,7 @@ jobs:
             path: |
                 ~/.gradle/caches
                 ~/.gradle/wrapper
+                ~/build
             restore-keys: |
                 ${{ runner.os }}-gradle-
 

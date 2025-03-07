@@ -45,10 +45,10 @@ jobs:
               with:
                 key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
                 path: |
-                  ~/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
-                  ~/.gradle/caches
-                  ~/.gradle/wrapper
-                  ~/build
+                    ~/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
+                    ~/.gradle/caches/
+                    ~/.gradle/wrapper/
+                    ~/build/
                 restore-keys: |
                   ${{ runner.os }}-gradle-
     run-tests:
@@ -72,9 +72,9 @@ jobs:
           with:
             key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
             path: |
-                ~/.gradle/caches
-                ~/.gradle/wrapper
-                ~/build
+                ~/.gradle/caches/
+                ~/.gradle/wrapper/
+                ~/build/
 
             restore-keys: |
                 ${{ runner.os }}-gradle-
@@ -104,9 +104,9 @@ jobs:
           with:
             key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
             path: |
-                ~/.gradle/caches
-                ~/.gradle/wrapper
-                ~/build
+                ~/.gradle/caches/
+                ~/.gradle/wrapper/
+                ~/build/
             restore-keys: |
                 ${{ runner.os }}-gradle-
 

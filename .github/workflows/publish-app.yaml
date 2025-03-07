@@ -16,7 +16,7 @@ jobs:
     setup-pipeline:
         runs-on: ubuntu-latest
         outputs:
-            gradle-cache-key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
+            artifact-name: ${{ steps.create-artifact-name.outputs.artifact-name }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
@@ -35,22 +35,17 @@ jobs:
               with:
                 arguments: assemble
 
-            - name: Create Gradlew Cache Key
-              id: create-gradlew-cache-key
-              run: echo "gradle-cache-key=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
+            - name: Create Artifact Name
+              id: create-artifact-name
+              run: echo "artifact-name=build-artifacts-${{ github.run_id }}" >> $GITHUB_OUTPUT
             
-            - name: Caches Gradle files
-              uses: actions/cache@v4
-              id: cache-gradle
+            
+            - name: Uploads build folder
+              uses: actions/upload-artifact@v4
               with:
-                key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
-                path: |
-                    ~/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
-                    ~/.gradle/caches/
-                    ~/.gradle/wrapper/
-                    ~/build/
-                restore-keys: |
-                  ${{ runner.os }}-gradle-
+                name: ${{ steps.create-artifact-name.outputs.artifact-name}}
+                path: build/
+                retention-days: 1
     run-tests:
         runs-on: ubuntu-latest
         needs: setup-pipeline
@@ -66,18 +61,10 @@ jobs:
             distribution: 'temurin'
             cache: gradle
 
-        - name: Restores Cached Gradle Files
-          uses: actions/cache@v4
-          id: cache-gradle
+        - name: Download build artifacts
+          uses: actions/download-artifact@v4
           with:
-            key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
-            path: |
-                ~/.gradle/caches/
-                ~/.gradle/wrapper/
-                ~/build/
-
-            restore-keys: |
-                ${{ runner.os }}-gradle-
+            name: $${{ needs.setup-pipeline.outputs.artifact-name }}
 
         - name: Executar Testes
           uses: gradle/gradle-build-action@v2
@@ -98,17 +85,10 @@ jobs:
             distribution: 'temurin'
             cache: gradle
 
-        - name: Restores Cached Gradle Files
-          uses: actions/cache@v4
-          id: cache-gradle
+        - name: Download build artifacts
+          uses: actions/download-artifact@v4
           with:
-            key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
-            path: |
-                ~/.gradle/caches/
-                ~/.gradle/wrapper/
-                ~/build/
-            restore-keys: |
-                ${{ runner.os }}-gradle-
+            name: $${{ needs.setup-pipeline.outputs.artifact-name }}
 
         - name: Extract version from build.gradle
           id: get_version

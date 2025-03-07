@@ -101,8 +101,8 @@ jobs:
         - name: Generate Docker tag
           id: generate_tag
           run: |
-            TAG="ghcr.io/${{ github.repository}}:${{ env.VERSION }}"
-            TAG_LATEST="ghcr.io/${{ github.repository.toLower()}}:latest"
+            TAG="ghcr.io/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):${{ env.VERSION }}"
+            TAG_LATEST="ghcr.io/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):latest"
             echo "TAG=$TAG" >> $GITHUB_ENV
             echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
 

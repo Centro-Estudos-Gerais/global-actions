@@ -117,13 +117,13 @@ jobs:
         - name: Extract version from build.gradle
           id: get_version
           run: |
-            version=$(grep '^version' build.gradle | awk '{print $2}')
-            echo "version=$version" >> $GITHUB_ENV
+            VERSION=$(grep -oP 'version=\K.*' gradle.properties)
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
 
         - name: Generate Docker tag
           id: generate_tag
           run: |
-            TAG="ceg/${{ github.repository }}:${{ env.version }}"
+            TAG="ceg/${{ github.repository }}:${{ env.VERSION }}"
             TAG_LATEST="ceg/${{ github.repository }}:latest"
             echo "TAG=$TAG" >> $GITHUB_ENV
             echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
@@ -157,3 +157,8 @@ jobs:
             echo "Version: ${{ env.version }}" >> $GITHUB_STEP_SUMMARY
             echo "Repository: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
             echo "Build and push completed successfully." >> $GITHUB_STEP_SUMMARY
+            echo "To test the image, run the following commands:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`sh" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
+            echo "docker run -d ${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

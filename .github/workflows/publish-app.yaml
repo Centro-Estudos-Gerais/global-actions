@@ -1,0 +1,159 @@
+name: Build and Publish Docker Image
+
+on:
+    workflow_call:
+        inputs:
+            isLatestTag:
+                description: 'Is this the latest tag?'
+                type: boolean
+                required: true
+                default: false
+        secrets:
+            GH_TOKEN:
+                required: true
+
+jobs:
+    setup-pipeline:
+        runs-on: ubuntu-latest
+        outputs:
+            gradle-cache-key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Setup Java Environment
+              uses: actions/setup-java@v2
+              with:
+                java-version: '21'
+                distribution: 'temurin'
+                cache: gradle
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v1
+
+            - name: Login to GitHub Container Registry
+              uses: docker/login-action@v1
+              with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GH_TOKEN }}
+            
+            - name: Build do Projeto
+              uses: gradle/gradle-build-action@v2
+              with:
+                arguments: assemble
+
+            - name: Create Gradlew Cache Key
+              id: create-gradlew-cache-key
+              run: echo "gradle-cache-key=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_OUTPUT
+            
+            - name: Caches Gradle files
+              uses: actions/cache@v4
+              id: cache-gradle
+              with:
+                key: ${{ steps.create-gradlew-cache-key.outputs.gradle-cache-key }}
+                path: |
+                  ~/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.*
+                  ~/.gradle/caches
+                  ~/.gradle/wrapper
+                restore-keys: |
+                  ${{ runner.os }}-gradle-
+    run-tests:
+        runs-on: ubuntu-latest
+        needs: setup-pipeline
+        steps:
+        
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Setup Java Environment
+          uses: actions/setup-java@v2
+          with:
+            java-version: '21'
+            distribution: 'temurin'
+            cache: gradle
+
+        - name: Restores Cached Gradle Files
+          uses: actions/cache@v4
+          id: cache-gradle
+          with:
+            key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
+            path: |
+                ~/.gradle/caches
+                ~/.gradle/wrapper
+            restore-keys: |
+                ${{ runner.os }}-gradle-
+
+        - name: Executar Testes
+          uses: gradle/gradle-build-action@v2
+          with:
+            arguments: test
+
+    build-docker-image:
+        runs-on: ubuntu-latest
+        needs: setup-pipeline
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+          
+        - name: Setup Java Environment
+          uses: actions/setup-java@v2
+          with:
+            java-version: '21'
+            distribution: 'temurin'
+            cache: gradle
+
+        - name: Restores Cached Gradle Files
+          uses: actions/cache@v4
+          id: cache-gradle
+          with:
+            key: ${{ needs.setup-pipeline.outputs.gradle-cache-key }}
+            path: |
+                ~/.gradle/caches
+                ~/.gradle/wrapper
+            restore-keys: |
+                ${{ runner.os }}-gradle-
+
+        - name: Extract version from build.gradle
+          id: get_version
+          run: |
+            version=$(grep '^version' build.gradle | awk '{print $2}')
+            echo "version=$version" >> $GITHUB_ENV
+
+        - name: Generate Docker tag
+          id: generate_tag
+          run: |
+            TAG="ceg/${{ github.repository }}:${{ env.version }}"
+            TAG_LATEST="ceg/${{ github.repository }}:latest"
+            echo "TAG=$TAG" >> $GITHUB_ENV
+            echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
+
+        - name: Build and push Docker image
+          uses: docker/build-push-action@v2
+          with:
+            context: .
+            push: true
+            tags: ${{ env.TAG }}         
+            
+        - name: Build and push Docker image as latest tag
+          if: ${{ inputs.isLatestTag == true }}
+          uses: docker/build-push-action@v2
+          with:
+            context: .
+            push: true
+            tags: ${{ env.TAG_LATEST }}    
+
+        - name: Generate report latest tag
+          if: ${{ inputs.isLatestTag == true }}
+          run: |
+              echo "## Build Report" >> $GITHUB_STEP_SUMMARY
+              echo "Version: ${{ env.version }}" >> $GITHUB_STEP_SUMMARY
+              echo "Repository: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+              echo "Build and push completed successfully." >> $GITHUB_STEP_SUMMARY
+
+        - name: Generate report
+          run: |
+            echo "## Build Report" >> $GITHUB_STEP_SUMMARY
+            echo "Version: ${{ env.version }}" >> $GITHUB_STEP_SUMMARY
+            echo "Repository: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+            echo "Build and push completed successfully." >> $GITHUB_STEP_SUMMARY

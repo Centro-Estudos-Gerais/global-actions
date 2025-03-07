@@ -102,7 +102,7 @@ jobs:
           id: generate_tag
           run: |
             TAG="ghcr.io/${{ github.repository}}:${{ env.VERSION }}"
-            TAG_LATEST="ghcr.io/${{ github.repository}}:latest"
+            TAG_LATEST="ghcr.io/${{ github.repository.toLower()}}:latest"
             echo "TAG=$TAG" >> $GITHUB_ENV
             echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
 

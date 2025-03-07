@@ -13,7 +13,7 @@ Arquivo que gera repositórios de aplicações em Quarkus (Java) a partir de um 
 ### 3. `ci-lib`
 Arquivo de referência para a ação homônima localizada em outro projeto. Essa ação compila a biblioteca e envia o artefato gerado para o repositório de bibliotecas da empresa.
 
-### 4. `ci-app`
+### 4. `publish-app`
 Arquivo de referência para a ação homônima localizada em outro projeto. Essa ação gera a imagem Docker da aplicação e a envia para o repositório de imagens da empresa.
 
 ### 5. `create-release`

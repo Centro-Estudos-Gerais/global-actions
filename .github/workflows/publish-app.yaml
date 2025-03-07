@@ -97,6 +97,14 @@ jobs:
           run: |
             VERSION=$(grep -oP 'version=\K.*' gradle.properties)
             echo "VERSION=$VERSION" >> $GITHUB_ENV
+                    
+        - name: Generate Docker tag
+          id: generate_tag
+          run: |
+            TAG="ghcr.io/${{ github.repository}}:${{ env.VERSION }}"
+            TAG_LATEST="ghcr.io/${{ github.repository}}:latest"
+            echo "TAG=$TAG" >> $GITHUB_ENV
+            echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
 
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v1
@@ -107,15 +115,6 @@ jobs:
             registry: ghcr.io
             username: ${{ github.actor }}
             password: ${{ secrets.GH_TOKEN }}
-            
-        - name: Generate Docker tag
-          id: generate_tag
-          run: |
-            REPO_NAME=$(basename ${{ github.repository }})
-            TAG="ceg/${REPO_NAME}:${{ env.VERSION }}"
-            TAG_LATEST="ceg/${REPO_NAME}:latest"
-            echo "TAG=$TAG" >> $GITHUB_ENV
-            echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
 
         - name: Build and push Docker image
           uses: docker/build-push-action@v2

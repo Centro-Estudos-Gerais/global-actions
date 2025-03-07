@@ -65,6 +65,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: ${{ needs.setup-pipeline.outputs.artifact-name }}
+            path: build/
 
         - name: Executar Testes
           uses: gradle/gradle-build-action@v2
@@ -89,6 +90,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: ${{ needs.setup-pipeline.outputs.artifact-name }}
+            path: build/
 
         - name: Extract version from build.gradle
           id: get_version

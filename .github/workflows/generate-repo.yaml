@@ -1,4 +1,4 @@
-name: Generate Repository from lib-template
+name: Generate New Repository
 
 on:
   workflow_dispatch:
@@ -6,6 +6,14 @@ on:
       artifact-id:
         description: 'Nome do repositório a ser criado'
         required: true
+        type: string
+      type:
+        description: 'Tipo do repositório a ser criado (app ou lib)'
+        required: true
+        type: choice
+        options:
+          - app
+          - lib
 
 jobs:
   generate-repo:
@@ -34,11 +42,19 @@ jobs:
             exit 1
           fi
 
+      - name: Set repository template based on type
+        id: set-repo
+        run: |
+          if [ "${{ inputs.type }}" == "app" ]; then
+            echo "REPO=app-template" >> $GITHUB_ENV
+          else
+            echo "REPO=lib-template" >> $GITHUB_ENV
+
       - name: Create new repository from template
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository_owner }}/lib-template" --private
+          gh repo create "${{ github.repository_owner }}/${{ inputs.artifact-id }}" --template "${{ github.repository_owner }}/${{ env.REPO }}" --private
 
       - name: Pause for 5 seconds
         run: sleep 5 
@@ -63,7 +79,7 @@ jobs:
           git config user.email "actions@github.com"
           git remote set-url origin "https://$GH_TOKEN@github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git"
           git add .
-          git commit -m "Update group-id and artifact-id to ceg.lib and ${{ inputs.artifact-id }}"
+          git commit -m "Update and artifact-id to ${{ inputs.artifact-id }}"
           git push origin master
 
       - name: Add repository link to summary

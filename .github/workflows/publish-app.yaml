@@ -72,7 +72,7 @@ jobs:
                 
             - name: Build and push Docker image as latest tag
               if: ${{ inputs.isLatestTag == true }}
-              uses: docker/build-push-action@v2
+              uses: docker/build-push-action@v2 
               with:
                 context: .
                 push: true

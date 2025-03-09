@@ -127,7 +127,7 @@ jobs:
       - name: Create Pull Request
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: gh pr create --title "Merge from ${{ github.ref }} into master" --body "Automatic merges by github action publish-lib.yml" --base master --head release/v0.0.2
+        run: gh pr create --title "Merge from ${{ github.ref }} into master" --body "Automatic merges by github action publish-lib.yml" --base master --head ${{ github.ref }}
 
       - name: Gerar Resumo do Workflow
         run: |

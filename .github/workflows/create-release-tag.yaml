@@ -1,5 +1,4 @@
-name: Create Release Tag from gradle.properties
-
+name: Create Release Tag
 on:
   workflow_call:
 jobs:

@@ -6,9 +6,6 @@ on:
       GH_TOKEN:
         required: true
 
-  push:
-    branches:
-      - release/v**
 jobs:
   setup-pipeline:
     runs-on: ubuntu-latest

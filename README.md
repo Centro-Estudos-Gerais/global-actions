@@ -1,43 +1,82 @@
-# Repositório de GitHub Actions da Organização
+GitHub Actions Repository for the Organization
 
-Este repositório centraliza os arquivos de GitHub Actions utilizados pela organização para automatizar processos relacionados a projetos Quarkus (Java). Ele contém ações para gerar repositórios, compilar bibliotecas, criar imagens Docker e gerenciar versões de projetos.
+This repository centralizes the GitHub Actions files used by the organization to automate processes related to Quarkus (Java) projects. It contains actions to generate repositories, compile libraries, create Docker images, and manage project versions.
 
-## Ações Disponíveis
+## Available Actions
 
-### 1. `generate-quarkus-lib`
-Arquivo que gera repositórios de bibliotecas para Quarkus (Java) a partir de um template pré-definido. Essa ação facilita a criação de novas bibliotecas padronizadas.
+### 1. `generate-repo`
+This GitHub Actions workflow, called "Generate New Repository", is triggered manually via the `workflow_dispatch` event. It creates a new repository based on a specified template (either "app" or "lib") within the organization, updates the `artifactId` in the `gradle.properties` file, commits the changes, and provides a summary with the link to the new repository.
 
-### 2. `generate-quarkus-app`
-Arquivo que gera repositórios de aplicações em Quarkus (Java) a partir de um repositório template. Essa ação garante que novas aplicações sigam um padrão consistente.
 
-### 3. `ci-lib`
-Arquivo de referência para a ação homônima localizada em outro projeto. Essa ação compila a biblioteca e envia o artefato gerado para o repositório de bibliotecas da empresa.
-
-### 4. `publish-app`
-Arquivo de referência para a ação homônima localizada em outro projeto. Essa ação gera a imagem Docker da aplicação e a envia para o repositório de imagens da empresa.
-
-### 5. `create-release`
-Arquivo de referência que automatiza a criação de uma nova versão (release) do projeto. Essa ação facilita o versionamento e a distribuição de novas versões.
-
-## Como Usar
-
-Cada ação está localizada em seu respectivo diretório dentro deste repositório. Para utilizar uma ação em seu projeto, siga os passos abaixo:
-
-1. Clone este repositório ou referencie as ações diretamente em seus workflows do GitHub Actions.
-2. Configure os parâmetros necessários no arquivo `.yml` do workflow.
-3. Execute o workflow no seu repositório.
-
-Exemplo de uso de uma ação em um workflow:
-
+### 2. `publish-lib`
+This workflow is triggered manually via `workflow_call`. It compiles the project, runs tests, and publishes the library. Additionally, it creates a Pull Request to merge the changes into the `master` branch.
 ```yaml
-name: Gerar Aplicação Quarkus
-on: [push]
+name: CI Pipeline
+on:
+  workflow_dispatch:
 jobs:
-  generate-app:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Gerar Aplicação Quarkus
-        uses: Centro-Estudos-Gerais/global-actions/generate-quarkus-app@v1
+  ci-pipeline:
+    uses: Centro-Estudos-Gerais/global-actions/.github/workflows/publish-lib.yaml@master
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+```
+
+### 3. `create-release-branch`
+This workflow is triggered manually via `workflow_call` and creates a new release branch based on the provided version. It validates the version format, checks if the branch already exists, creates the branch, and updates the version in the `gradle.properties` file.
+#### Usage Example
+```yaml
+name: Create Release Branch
+on:
+  workflow_dispatch: 
+    inputs:
+      version:
+        description: 'Semantic version number (e.g., 0.0.1)'
+        required: true
+        type: string
+jobs:
+  create-release-branch:
+    uses: Centro-Estudos-Gerais/global-actions/.github/workflows/create-release-branch.yaml@master
+    permissions:
+      contents: write
+    with:
+      version: ${{ inputs.version }}
+```
+
+### 4. `create-release-tag`
+This workflow is triggered manually via `workflow_call` and creates a new release tag based on the version specified in the `gradle.properties` file. It also generates a timestamp and adds a message to the tag.
+#### Usage Example
+```yaml
+name: Create Release Tag
+on:
+    pull_request:
+        types: [closed]
+        branches: [master]        
+
+jobs:
+    create-release-tag:
+        uses: Centro-Estudos-Gerais/global-actions/.github/workflows/create-release-tag.yaml@master
+        permissions:
+            contents: write
+```
+
+### 5. `publish-app`
+This workflow is triggered manually via `workflow_call` and compiles the project, runs tests, generates a Docker image, and publishes it to the GitHub Container Registry. It can also tag the image as the latest version (`latest`) if specified.
+#### Usage Example
+```yaml
+name: Publish App
+on:
+  workflow_dispatch:
+    inputs:
+      isLatestTag:
+        description: 'Is this the last tag?'
+        required: true
+        type: boolean
+        default: false
+jobs:
+    build-and-publish:
+        uses: Centro-Estudos-Gerais/global-actions/.github/workflows/publish-app.yaml@master
+        secrets:
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          template-repo: "url-do-template"
-          new-repo-name: "nome-do-novo-repositorio"
+            isLatestTag: ${{ inputs.isLatestTag }}
+```

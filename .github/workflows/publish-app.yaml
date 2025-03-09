@@ -27,26 +27,13 @@ jobs:
               with:
                 java-version: '21'
                 distribution: 'temurin'
-                cache: gradle
-           
+                cache: gradle           
             
             - name: Build do Projeto
               uses: gradle/gradle-build-action@v2
               with:
                 arguments: assemble
 
-            - name: Create Artifact Name
-              id: create-artifact-name
-              run: echo "artifact-name=build-artifacts-${{ github.run_id }}" >> $GITHUB_OUTPUT
-            
-            
-            - name: Uploads build folder
-              uses: actions/upload-artifact@v4
-              with:
-                name: ${{ steps.create-artifact-name.outputs.artifact-name}}
-                path: build/
-                retention-days: 1
-            
             - name: Executar Testes
               uses: gradle/gradle-build-action@v2
               with:

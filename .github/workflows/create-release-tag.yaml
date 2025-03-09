@@ -33,4 +33,4 @@ jobs:
           git config user.email "actions@github.com"
           TAG_MESSAGE="Version ${{ steps.read-version.outputs.version }} created at ${{ steps.timestamp.outputs.timestamp }}"
           git tag -a "${{ steps.read-version.outputs.version }}" -m "$TAG_MESSAGE"
-          git push origin " ${{ steps.read-version.outputs.version }}"
+          git push origin "${{ steps.read-version.outputs.version }}"

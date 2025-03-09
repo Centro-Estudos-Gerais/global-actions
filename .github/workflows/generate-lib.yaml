@@ -68,8 +68,9 @@ jobs:
 
       - name: Add repository link to summary
         run: |
-          echo "Novo repositório criado: [${{ inputs.artifact-id }}](https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }})" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY"
-          echo "git clone https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git" >> $GITHUB_STEP_SUMMARY"
-          echo "```" >> $GITHUB_STEP_SUMMARY"
+          echo "Novo repositório criado: [${{ inputs.artifact-id }}](https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }})" >> release_report.md
+          echo "```" >> release_report.md
+          echo "git clone https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git" >> release_report.md
+          echo "```" >> release_report.md
+          cat release_report.md >> $GITHUB_STEP_SUMMARY
           

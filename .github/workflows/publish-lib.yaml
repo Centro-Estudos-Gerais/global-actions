@@ -50,7 +50,7 @@ jobs:
     
       - name: Gerar Resumo do Workflow
         run: |
-          echo "## 🚀 Relatório do Workflow" >> $GITHUB_STEP_SUMMARY
-          echo "| Etapa  | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Relatório do Workflow" >> release_report.md
+          echo "| Etapa  | Status |" >> release_report.md
+          echo "|--------|--------|" >> release_report.md
+          echo "| Create-PR | ✅ Sucesso |" release_report.md

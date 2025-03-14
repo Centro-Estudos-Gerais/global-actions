@@ -49,6 +49,7 @@ jobs:
             echo "REPO=app-template" >> $GITHUB_ENV
           else
             echo "REPO=lib-template" >> $GITHUB_ENV
+          fi
 
       - name: Create new repository from template
         env:

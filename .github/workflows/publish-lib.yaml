@@ -41,13 +41,35 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       
       - name: Create Pull Request
+        id: create-pr
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: gh pr create --title "Merge from ${{ github.ref }} into master" --body "Automatic merges by github action publish-lib.yml" --base master --head ${{ github.ref }}
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "BRANCH=$BRANCH"
+          PR_EXISTS=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo "0")
+          if [ "$PR_EXISTS" -gt 0 ]; then
+            echo "PR_EXISTS=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ Pull Request já existe para $BRANCH — pulando criação."
+          else
+            echo "PR_EXISTS=false" >> $GITHUB_OUTPUT
+            gh pr create \
+              --title "Merge from $BRANCH into master" \
+              --body "Automatic merge by publish-lib.yml workflow" \
+              --base master \
+              --head "$BRANCH"
+            echo "✅ Pull Request criado com sucesso."
+          fi
     
       - name: Gerar Resumo do Workflow
+        env:
+          PR_EXISTS: ${{ steps.create-pr.outputs.PR_EXISTS }}
         run: |
           echo "## 🚀 Relatório do Workflow" >> $GITHUB_STEP_SUMMARY
           echo "| Etapa  | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY
+          if [ "$PR_EXISTS" = "true" ]; then
+            echo "| Create-PR | ⚠️ Já existia — pulado |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY
+          fi

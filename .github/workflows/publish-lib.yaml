@@ -47,29 +47,58 @@ jobs:
         run: |
           BRANCH="${GITHUB_REF#refs/heads/}"
           echo "BRANCH=$BRANCH"
-          PR_EXISTS=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo "0")
-          if [ "$PR_EXISTS" -gt 0 ]; then
-            echo "PR_EXISTS=true" >> $GITHUB_OUTPUT
-            echo "ℹ️ Pull Request já existe para $BRANCH — pulando criação."
-          else
-            echo "PR_EXISTS=false" >> $GITHUB_OUTPUT
-            gh pr create \
+          {
+            PR_EXISTS=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo "0")
+            if [ "$PR_EXISTS" -gt 0 ]; then
+              echo "PR_EXISTS=true" >> $GITHUB_OUTPUT
+              echo "PR_STATUS=exists"
+              echo "ℹ️ Pull Request já existe para $BRANCH — pulando criação."
+              exit 0
+            fi
+
+            COMMITS_AHEAD=$(gh pr create \
               --title "Merge from $BRANCH into master" \
               --body "Automatic merge by publish-lib.yml workflow" \
               --base master \
-              --head "$BRANCH"
-            echo "✅ Pull Request criado com sucesso."
-          fi
+              --head "$BRANCH" 2>&1) || true
+
+            if echo "$COMMITS_AHEAD" | grep -q "No commits between"; then
+              echo "PR_EXISTS=false" >> $GITHUB_OUTPUT
+              echo "PR_STATUS=no-commits"
+              echo "⚠️ Nenhum commit novo entre master e $BRANCH — PR não criado."
+            elif echo "$COMMITS_AHEAD" | grep -q "already exists"; then
+              echo "PR_EXISTS=true" >> $GITHUB_OUTPUT
+              echo "PR_STATUS=exists"
+              echo "ℹ️ Pull Request já existe para $BRANCH — pulando criação."
+            else
+              echo "PR_EXISTS=false" >> $GITHUB_OUTPUT
+              echo "PR_STATUS=created"
+              echo "✅ Pull Request criado com sucesso."
+            fi
+          } || {
+            echo "PR_EXISTS=false" >> $GITHUB_OUTPUT
+            echo "PR_STATUS=unknown-error"
+            echo "❌ Erro inesperado ao criar PR: $(echo "$COMMITS_AHEAD" | head -1)"
+          }
     
       - name: Gerar Resumo do Workflow
         env:
-          PR_EXISTS: ${{ steps.create-pr.outputs.PR_EXISTS }}
+          PR_STATUS: ${{ steps.create-pr.outputs.PR_STATUS }}
         run: |
           echo "## 🚀 Relatório do Workflow" >> $GITHUB_STEP_SUMMARY
           echo "| Etapa  | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
-          if [ "$PR_EXISTS" = "true" ]; then
-            echo "| Create-PR | ⚠️ Já existia — pulado |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY
-          fi
+          case "$PR_STATUS" in
+            created)
+              echo "| Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY
+              ;;
+            exists)
+              echo "| Create-PR | ⚠️ Já existia — pulado |" >> $GITHUB_STEP_SUMMARY
+              ;;
+            no-commits)
+              echo "| Create-PR | ⏭️ Sem commits novos — pulado |" >> $GITHUB_STEP_SUMMARY
+              ;;
+            *)
+              echo "| Create-PR | ❌ Erro: $PR_STATUS |" >> $GITHUB_STEP_SUMMARY
+              ;;
+          esac

@@ -83,6 +83,25 @@ jobs:
           git commit -m "Update and artifact-id to ${{ inputs.artifact-id }}"
           git push origin master
 
+      - name: Configure branch protection on master
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo '{
+            "required_status_checks": {"strict": true, "contexts": []},
+            "enforce_admins": true,
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 1,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": false
+            },
+            "restrictions": null,
+            "allow_force_pushes": false,
+            "allow_deletions": false,
+            "required_linear_history": true,
+            "block_creations": true
+          }' | gh api "repos/${{ github.repository_owner }}/${{ inputs.artifact-id }}/branches/master/protection" -X PUT --input -
+
       - name: Add repository link to summary
         run: |
           echo "Novo repositório criado: [${{ inputs.artifact-id }}](https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }})" >> release_report.md

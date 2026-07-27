@@ -25,12 +25,17 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: assemble
-
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Executar Testes
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       
       - name: Publicar com Gradle
         uses: gradle/gradle-build-action@v2

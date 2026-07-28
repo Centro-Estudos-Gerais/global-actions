@@ -20,51 +20,51 @@ jobs:
             artifact-name: ${{ steps.create-artifact-name.outputs.artifact-name }}
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
 
             - name: Setup Java Environment
-              uses: actions/setup-java@v2
+              uses: actions/setup-java@v4
               with:
                 java-version: '21'
                 distribution: 'temurin'
-                cache: gradle           
             
             - name: Build do Projeto
-              uses: gradle/gradle-build-action@v2
+              uses: gradle/gradle-build-action@v3
               with:
                 arguments: assemble
 
             - name: Executar Testes
-              uses: gradle/gradle-build-action@v2
+              uses: gradle/gradle-build-action@v3
               with:
                 arguments: test
    
-            - name: Extract version from build.gradle
+            - name: Extract version from gradle.properties
               id: get_version
               run: |
-                VERSION=$(grep -oP 'version=\K.*' gradle.properties)
+                VERSION=$(grep '^version=' gradle.properties | head -1 | cut -d'=' -f2)
                 echo "VERSION=$VERSION" >> $GITHUB_ENV
                           
             - name: Generate Docker tag
               id: generate_tag
               run: |
-                TAG="ghcr.io/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):${{ env.VERSION }}"
-                TAG_LATEST="ghcr.io/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):latest"
-                echo "TAG=$TAG" >> $GITHUB_ENV
-                echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
+                REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+                TAG="ghcr.io/${REPO_LOWER}:${{ env.VERSION }}"
+                TAG_LATEST="ghcr.io/${REPO_LOWER}:latest"
+                echo "TAG=$TAG" >> "$GITHUB_ENV"
+                echo "TAG_LATEST=$TAG_LATEST" >> "$GITHUB_ENV"
       
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v1
+              uses: docker/setup-buildx-action@v3
     
             - name: Login to GitHub Container Registry
-              uses: docker/login-action@v1
+              uses: docker/login-action@v3
               with:
                 registry: ghcr.io
                 username: ${{ github.actor }}
                 password: ${{ secrets.GH_TOKEN }}
     
             - name: Build and push Docker image
-              uses: docker/build-push-action@v2
+              uses: docker/build-push-action@v6
               with:
                 context: .
                 push: true
@@ -72,7 +72,7 @@ jobs:
                 
             - name: Build and push Docker image as latest tag
               if: ${{ inputs.isLatestTag == true }}
-              uses: docker/build-push-action@v2 
+              uses: docker/build-push-action@v6
               with:
                 context: .
                 push: true
@@ -82,26 +82,41 @@ jobs:
               if: ${{ inputs.isLatestTag == true }}
               run: |
                   echo "## Build Report" >> $GITHUB_STEP_SUMMARY
-                  echo "Version: ${{ env.version }}" >> $GITHUB_STEP_SUMMARY
+                  echo "Version: ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
                   echo "Repository: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
                   echo "Build and push completed successfully." >> $GITHUB_STEP_SUMMARY
     
             - name: Generate report
               run: |
                 echo "## Build Report" >> $GITHUB_STEP_SUMMARY
-                echo "Version: ${{ env.version }}" >> $GITHUB_STEP_SUMMARY
+                echo "Version: ${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
                 echo "Repository: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
                 echo "Build and push completed successfully." >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
                 echo "To test the image, run the following commands:" >> $GITHUB_STEP_SUMMARY
-                echo "\`\`\`sh" >> $GITHUB_STEP_SUMMARY
+                echo '```sh' >> $GITHUB_STEP_SUMMARY
                 echo "docker pull ${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
                 echo "docker run -d ${{ env.TAG }}" >> $GITHUB_STEP_SUMMARY
-                echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
       
             - name: Create Pull Request
+              id: create-pr
               env:
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-              run: gh pr create --title "Merge from ${{ github.ref }} into master" --body "Automatic merges by github action publish-lib.yml" --base master --head ${{ github.ref }}
+              run: |
+                BRANCH="${GITHUB_REF#refs/heads/}"
+                PR_EXISTS=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo "0")
+                if [ "$PR_EXISTS" -gt 0 ]; then
+                  echo "PR_STATUS=exists" >> $GITHUB_OUTPUT
+                  echo "ℹ️ Pull Request já existe para $BRANCH — pulando."
+                  exit 0
+                fi
+                gh pr create \
+                  --title "Merge from $BRANCH into master" \
+                  --body "Merge automático via publish-app workflow" \
+                  --base master \
+                  --head "$BRANCH" 2>&1 || true
+                echo "PR_STATUS=created" >> $GITHUB_OUTPUT
       
             - name: Gerar Resumo do Workflow
               run: |
@@ -109,6 +124,3 @@ jobs:
                   echo "| Etapa  | Status |" >> $GITHUB_STEP_SUMMARY
                   echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
                   echo "| Create-PR | ✅ Sucesso |" >> $GITHUB_STEP_SUMMARY
-    
-        
-    

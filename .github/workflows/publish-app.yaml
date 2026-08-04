@@ -33,7 +33,7 @@ jobs:
               with:
                 arguments: assemble
               env:
-                GITHUB_ACTOR: ${{ github.GITHUB_ACTOR }}
+                GITHUB_ACTOR: ${{ github.actor }}
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
             - name: Executar Testes
@@ -41,7 +41,7 @@ jobs:
               with:
                 arguments: test
               env:
-                GITHUB_ACTOR: ${{ github.GITHUB_ACTOR }}
+                GITHUB_ACTOR: ${{ github.actor }}
                 GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
    
             - name: Extract version from gradle.properties
@@ -66,7 +66,7 @@ jobs:
               uses: docker/login-action@v3
               with:
                 registry: ghcr.io
-                username: ${{ github.GITHUB_ACTOR }}
+                username: ${{ github.actor }}
                 password: ${{ secrets.GH_TOKEN }}
     
             - name: Build and push Docker image

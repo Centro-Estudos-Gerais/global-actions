@@ -32,11 +32,17 @@ jobs:
               uses: gradle/gradle-build-action@v3
               with:
                 arguments: assemble
+              env:
+                GITHUB_ACTOR: ${{ github.actor }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Executar Testes
               uses: gradle/gradle-build-action@v3
               with:
                 arguments: test
+              env:
+                GITHUB_ACTOR: ${{ github.actor }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
    
             - name: Extract version from gradle.properties
               id: get_version
@@ -61,7 +67,7 @@ jobs:
               with:
                 registry: ghcr.io
                 username: ${{ github.actor }}
-                password: ${{ secrets.GH_TOKEN }}
+                password: ${{ secrets.GITHUB_TOKEN }}
     
             - name: Build and push Docker image
               uses: docker/build-push-action@v6
@@ -102,7 +108,7 @@ jobs:
             - name: Create Pull Request
               id: create-pr
               env:
-                GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                 BRANCH="${GITHUB_REF#refs/heads/}"
                 PR_EXISTS=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo "0")

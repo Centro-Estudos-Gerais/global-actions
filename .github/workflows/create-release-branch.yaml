@@ -53,7 +53,12 @@ jobs:
 
       - name: Add branch validation report to GitHub summary
         if: always()
-        run: cat branch_report.md >> $GITHUB_STEP_SUMMARY
+        run: |
+          if [ -f branch_report.md ]; then
+            cat branch_report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Branch validation report not generated." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Create release branch
         id: create_branch
@@ -89,4 +94,9 @@ jobs:
 
       - name: Add release report to GitHub summary
         if: always()
-        run: cat release_report.md >> $GITHUB_STEP_SUMMARY
+        run: |
+          if [ -f release_report.md ]; then
+            cat release_report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Release report not generated (branch creation aborted or skipped)." >> $GITHUB_STEP_SUMMARY
+          fi

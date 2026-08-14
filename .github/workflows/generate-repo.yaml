@@ -104,7 +104,7 @@ jobs:
 
       - name: Add repository link to summary
         run: |
-          echo "Novo repositório criado: [${{ inputs.artifact-id }}](https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }})" >> release_report.md
+          echo "Novo repositório criado: [${{ inputs.artifact-id }}](https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }})" > release_report.md
           echo "\`\`\`" >> release_report.md
           echo "git clone https://github.com/${{ github.repository_owner }}/${{ inputs.artifact-id }}.git" >> release_report.md
           echo "\`\`\`" >> release_report.md

@@ -67,12 +67,20 @@ jobs:
           git checkout -b $BRANCH_NAME
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
 
-      - name: Update version in gradle.properties
+      - name: Update version in project file
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          sed -i "s/^version=.*/version=${{ inputs.version }}/" gradle.properties
-          git add gradle.properties
+          if [ -f gradle.properties ]; then
+            sed -i "s/^version=.*/version=${{ inputs.version }}/" gradle.properties
+            git add gradle.properties
+          elif [ -f package.json ]; then
+            npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version
+            git add package.json
+            if [ -f package-lock.json ]; then git add package-lock.json; fi
+          else
+            echo "::warning::Nenhum arquivo de versao encontrado (gradle.properties ou package.json); branch criada sem bump."
+          fi
           git commit -m "Update version to ${{ inputs.version }}"
           git push --set-upstream origin ${{ env.branch_name }}
         env:

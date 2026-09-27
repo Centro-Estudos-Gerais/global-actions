@@ -12,10 +12,17 @@ jobs:
         with:
           fetch-depth: 0  
 
-      - name: Get version from  gradle.properties
+      - name: Get version from gradle.properties or package.json
         id: read-version
         run: |
-          VERSION=$(grep -oP 'version=\K.*' gradle.properties)
+          if [ -f gradle.properties ]; then
+            VERSION=$(grep -oP '^version=\K.*' gradle.properties | head -1)
+          elif [ -f package.json ]; then
+            VERSION=$(node -p "require('./package.json').version")
+          else
+            echo "::error::Nao encontrei gradle.properties nem package.json para ler a versao."
+            exit 1
+          fi
           echo "Versão encontrada: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
